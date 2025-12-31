@@ -46,8 +46,7 @@ This will:
 - Print the resulting schedule
 
 ## Customization
-- Adjust model parameters or constants in `config/config.py`
-- Modify constraints or objectives in `model/scheduler.py`
+- Adjust league info in `config/config.py`
 - Use `example/get_schedule.py` as a template for downstream analysis or experimentation
   
 ## Notes
