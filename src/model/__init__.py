@@ -1,3 +1,3 @@
 from scheduler import NFLScheduler
 
-__all__ = ['NFLScheduler']
+__all__ = ["NFLScheduler"]
