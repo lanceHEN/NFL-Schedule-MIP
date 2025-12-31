@@ -27,6 +27,7 @@ class LeagueConfig:
     # Bye info
     min_bye: int = 5
     max_bye: int = 14
+    byes_per_team: int = 1
     
     # Conference info
     conferences: Iterable[str] = field(default_factory=lambda: {'NFC', 'AFC'})

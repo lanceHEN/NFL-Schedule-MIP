@@ -1,5 +1,7 @@
 """For code to solve the NFL scheduling problem."""
 
+import math
+
 import pulp as pl
 import pandas as pd
 
@@ -141,12 +143,12 @@ class NFLScheduler:
             # MNF
             prob += pl.lpSum(x[home][away][week]['Monday Night'] for home in self.league_config.teams for away in self.league_config.teams) == 1
     
-        # SB Winner Must Play first TNF Game home
-        prob += pl.lpSum(x[self.league_config.sb_winner][away][1]['Thursday Night'] for away in self.league_config.teams) == 1
+        # SB Winner Must Play first game home
+        prob += pl.lpSum(x[self.league_config.sb_winner][away][1][self.league_config.time_slots[0]] for away in self.league_config.teams) == 1
 
-        # 1 Bye per team
+        # byes_per_team Byes per team
         for team in self.league_config.teams:
-            prob += pl.lpSum(b[team][w] for w in self.league_config.weeks) == 1
+            prob += pl.lpSum(b[team][w] for w in self.league_config.weeks) == self.league_config.byes_per_team
     
         # Bye week falls in valid range
         for team in self.league_config.teams:
@@ -155,11 +157,13 @@ class NFLScheduler:
     
         # Same number of teams per bye week
 
-        # Bye weeks evenly distributed for each week, i.e. for each eligible bye week, there are len(teams) / (max_bye - min_bye + 1) teams on bye
-        teams_per_bye = len(self.league_config.teams) / (self.league_config.max_bye - self.league_config.min_bye + 1)
+        # Bye weeks evenly distributed for each week, i.e. for each eligible bye week, if k = len(teams) / (max_bye - min_bye + 1),
+        # there are between floor(k) and ceil(k) teams on bye
+        k = len(self.league_config.teams) / (self.league_config.max_bye - self.league_config.min_bye + 1)
 
         for bye in range(self.league_config.min_bye, self.league_config.max_bye + 1):
-            prob += pl.lpSum(b[team][bye] for team in self.league_config.teams) == teams_per_bye
+            prob += pl.lpSum(b[team][bye] for team in self.league_config.teams) >= math.floor(k)
+            prob += pl.lpSum(b[team][bye] for team in self.league_config.teams) <= math.ceil(k)
 
         # Team must be either on bye, home, or away
         for team in self.league_config.teams:
